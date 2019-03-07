@@ -1,0 +1,41 @@
+{
+  "name": "auto-validate",
+  "version": "1.0.0",
+  "description": "validate object by decorators in typescript",
+  "main": "index.js",
+  "sideEffects": false,
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "build-dev": "webpack",
+    "build": "webpack --config webpack.prod.js",
+    "test": "mocha --require ts-node/register test/**/*.ts",
+    "ts": "ts-node"
+  },
+  "keywords": [
+    "validate",
+    "decorator",
+    "typescript"
+  ],
+  "author": "fisher <i.yu@qq.com>",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fishen/auto-validate.git"
+  },
+  "dependencies": {
+    "reflect-metadata": "^0.1.13"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.1.7",
+    "@types/mocha": "^5.2.6",
+    "chai": "^4.2.0",
+    "mocha": "^6.0.2",
+    "ts-loader": "^5.3.3",
+    "ts-node": "^8.0.2",
+    "typescript": "^3.3.3333",
+    "webpack": "^4.29.3",
+    "webpack-cli": "^3.2.3"
+  }
+}

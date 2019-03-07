@@ -1,0 +1,5 @@
+test/
+example/
+package-lock.json
+webpack.*.js
+*.tgz

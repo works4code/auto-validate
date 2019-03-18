@@ -1,4 +1,4 @@
-import { validate, isLessThanOrEqualTo, lte } from '../index';
+import { validate, isLessThanOrEqualTo, lte } from '../src/index';
 import { expect } from 'chai';
 import 'mocha';
 

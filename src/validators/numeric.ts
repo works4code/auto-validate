@@ -8,11 +8,11 @@ import { validator } from "./validator";
  */
 export function isNumeric(value: any): boolean {
     const type = typeof value;
-    if (type === 'number') {
+    if (type === "number") {
         return !isNaN(value);
-    } else if (type === 'string') {
+    } else if (type === "string") {
         return isNumeric(Number(value));
-    } else if (type === 'object') {
+    } else if (type === "object") {
         return isNumeric(value.valueOf());
     } else {
         return false;
@@ -25,7 +25,7 @@ export function isNumeric(value: any): boolean {
  * @param options Validator Options
  */
 export function numeric(options?: IValidatorOptions) {
-    const message = 'The {display} is not a numeric type.';
-    options = Object.assign({ arguments, message, type: 'numeric' }, options);
+    const message = "The {display} is not a numeric type.";
+    options = Object.assign({ arguments, message, type: "numeric" }, options);
     return validator(isNumeric, options);
 }

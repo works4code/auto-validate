@@ -1,4 +1,4 @@
-import { validate, numeric, isNumeric } from '../index';
+import { validate, numeric, isNumeric } from '../src/index';
 import { expect } from 'chai';
 import 'mocha';
 

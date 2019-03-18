@@ -1,4 +1,4 @@
-import { validate, negate, isNumeric, isEmail } from '../index';
+import { validate, negate, isNumeric, isEmail } from '../src/index';
 import { expect } from 'chai';
 import 'mocha';
 

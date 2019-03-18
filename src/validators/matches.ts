@@ -1,10 +1,12 @@
+import { curryRight } from "../utils/index";
 import { IValidatorOptions } from "../validatorOptions";
 import { validator } from "./validator";
-import { curryRight } from '../utils/index';
 
 interface IMatchValidatorOptions {
-    /**Indicates the flags to add, or if an object is supplied for the pattern.*/
-    flags?: string
+    /**
+     * Indicates the flags to add, or if an object is supplied for the pattern.
+     */
+    flags?: string;
 }
 
 /**
@@ -14,7 +16,7 @@ interface IMatchValidatorOptions {
  * @param options Validator options.
  */
 export function isMatch(value: string, pattern: RegExp | string, options?: IMatchValidatorOptions): boolean {
-    if (typeof pattern === 'string') {
+    if (typeof pattern === "string") {
         return isMatch(value, new RegExp(pattern, options && options.flags));
     } else if (pattern instanceof RegExp) {
         return pattern.test(value);
@@ -26,11 +28,11 @@ export function isMatch(value: string, pattern: RegExp | string, options?: IMatc
 /**
  * Indicates whether or not a pattern exists in current value.
  * @param pattern The text of the regular expression.
- * @param options 
+ * @param options
  */
 export function matches(pattern: RegExp | string, options?: IMatchValidatorOptions & IValidatorOptions) {
     const predicate = curryRight(isMatch, pattern, options);
-    const message = 'The {display} does not match the requested format.';
-    options = Object.assign({ arguments, message, type: 'matches' }, options);
+    const message = "The {display} does not match the requested format.";
+    options = Object.assign({ arguments, message, type: "matches" }, options);
     return validator(predicate as any, options);
 }

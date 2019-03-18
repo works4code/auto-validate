@@ -1,6 +1,6 @@
+import { curryRight } from "../utils/index";
 import { IValidatorOptions } from "../validatorOptions";
 import { validator } from "./validator";
-import { curryRight } from '../utils/index';
 
 const rules: Record<string, RegExp> = {
     4: /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/,
@@ -21,9 +21,9 @@ interface IIPValidatorOptions {
 export function isIP(value: string, options?: IIPValidatorOptions) {
     options = Object.assign({ version: 4 }, options);
     const regex = rules[options.version];
-    if (!regex) return false;
+    if (!regex) { return false; }
     return regex.test(value);
-};
+}
 
 /**
  * Indicates whether or not the current property value is an IP (version 4 or 6).
@@ -31,8 +31,8 @@ export function isIP(value: string, options?: IIPValidatorOptions) {
  * @param options Validator options.
  */
 export function ip(options?: IIPValidatorOptions & IValidatorOptions) {
-    const message = 'The {display} is a invalid IP address.';
+    const message = "The {display} is a invalid IP address.";
     const predicate = curryRight(isIP, options);
-    options = Object.assign({ arguments, message, type: 'ip' }, options);
+    options = Object.assign({ arguments, message, type: "ip" }, options);
     return validator(predicate as any, options);
 }

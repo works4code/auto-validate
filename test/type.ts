@@ -1,4 +1,4 @@
-import { validate, isType, type } from '../index';
+import { validate, isType, type } from '../src/index';
 import { expect } from 'chai';
 import 'mocha';
 

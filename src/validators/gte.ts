@@ -1,8 +1,8 @@
+import { curryRight } from "../utils/index";
 import { IValidatorOptions } from "../validatorOptions";
-import { validator } from './validator';
-import { curryRight } from '../utils/index';
-import { isEqual } from './equals';
-import { isGreaterThan } from './gt';
+import { isEqual } from "./equals";
+import { isGreaterThan } from "./gt";
+import { validator } from "./validator";
 
 /**
  * Indicates whether or not the value is greater than other value.
@@ -19,8 +19,8 @@ export function isGreaterThanOrEqualTo(value: any, other: any): boolean {
  * @param options Validator options.
  */
 export function gte(other: any, options?: IValidatorOptions) {
-    const message = 'The {display} must be greater than or equal to {$0}, current is {value}.';
-    options = Object.assign({ arguments, message, type: 'gte' }, options);
+    const message = "The {display} must be greater than or equal to {$0}, current is {value}.";
+    options = Object.assign({ arguments, message, type: "gte" }, options);
     const predicate = curryRight(isGreaterThanOrEqualTo, other);
     return validator(predicate, options);
 }

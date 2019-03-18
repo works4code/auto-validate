@@ -17,7 +17,7 @@ export class ValidateResult<T> {
      * Get all errors by special property name.
      * @param property property name
      */
-    getErrors(property: keyof T): ValidateError[] {
+    public getErrors(property: keyof T): ValidateError[] {
         if (this.hasError(property)) {
             return this.errors.get(property);
         } else {
@@ -29,9 +29,9 @@ export class ValidateResult<T> {
      * @param property property name
      * @param errorType error type
      */
-    getError(property: keyof T, errorType: string): ValidateError | null {
+    public getError(property: keyof T, errorType: string): ValidateError | null {
         if (this.hasError(property, errorType)) {
-            return this.errors.get(property).find(e => e.type === errorType);
+            return this.errors.get(property).find((e) => e.type === errorType);
         } else {
             return null;
         }
@@ -43,26 +43,26 @@ export class ValidateResult<T> {
      * @param property property name
      * @param errorType error type
      */
-    hasError(property?: keyof T, errorType?: string): boolean {
+    public hasError(property?: keyof T, errorType?: string): boolean {
         if (this.errors instanceof Map) {
             if (property) {
                 if (errorType) {
-                    return this.errors.has(property) && this.errors.get(property).some(e => e.type === errorType);
+                    return this.errors.has(property) && this.errors.get(property).some((e) => e.type === errorType);
                 } else {
                     return this.errors.has(property);
                 }
             } else {
                 return this.errors.size > 0;
             }
-        };
+        }
         return false;
     }
     /**
      * Convert errors to the specified type based on a custom function.
      * @param callback custom convert function.
      */
-    map(callback: (errors: Map<keyof T, ValidateError[]>) => any) {
-        if (typeof callback === 'function') {
+    public map(callback: (errors: Map<keyof T, ValidateError[]>) => any) {
+        if (typeof callback === "function") {
             return callback(this.errors);
         } else {
             return this.errors;
@@ -71,10 +71,10 @@ export class ValidateResult<T> {
     /**
      * Convert the current grouping errors into a list form.
      */
-    toList(): ValidateError[] {
+    public toList(): ValidateError[] {
         if (this.hasError()) {
-            let list: ValidateError[] = [];
-            this.errors.forEach((errors) => errors.forEach(error => list.push(error)));
+            const list: ValidateError[] = [];
+            this.errors.forEach((errors) => errors.forEach((error) => list.push(error)));
             return list;
         }
         return [];
@@ -82,7 +82,7 @@ export class ValidateResult<T> {
     /**
      * Convert the current grouping errors into a single error object.
      */
-    toSingle(): ValidateError | null {
+    public toSingle(): ValidateError | null {
         if (this.hasError()) {
             for (const errors of this.errors.values()) {
                 return errors[0];

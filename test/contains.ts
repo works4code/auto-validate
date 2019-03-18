@@ -1,4 +1,4 @@
-import { validate, isContain, contains } from '../index';
+import { validate, isContain, contains } from '../src/index';
 import { expect } from 'chai';
 import 'mocha';
 

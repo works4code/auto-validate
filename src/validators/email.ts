@@ -14,7 +14,7 @@ export function isEmail(value: string) {
  * @param options Validator options
  */
 export function email(options?: IValidatorOptions) {
-    const message = 'The {display} is not the correct email address format.';
-    options = Object.assign({ arguments, message, type: 'email' }, options);
+    const message = "The {display} is not the correct email address format.";
+    options = Object.assign({ arguments, message, type: "email" }, options);
     return validator(isEmail, options);
 }

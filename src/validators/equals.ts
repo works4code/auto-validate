@@ -18,16 +18,16 @@ export function isEqual(value: any, other: any) {
 
 /**
  * Compare between two values to determine if they are equivalent.
- * @param other The other value to compare. 
+ * @param other The other value to compare.
  * @param options Validator options.
  */
 export function equals(other: any | ((target: any) => any), options?: IValidatorOptions) {
-    const message = 'The {display} is not equal to {$0}.';
-    options = Object.assign({ arguments, message, type: 'equals' }, options);
-    const predicate = function (value: any, target: any) {
-        other = typeof other === 'function' ? other(target) : other;
+    const message = "The {display} is not equal to {$0}.";
+    options = Object.assign({ arguments, message, type: "equals" }, options);
+    const predicate = function(value: any, target: any) {
+        other = typeof other === "function" ? other(target) : other;
         options.arguments[0] = other;
         return isEqual(value, other);
-    }
+    };
     return validator(predicate, options);
 }

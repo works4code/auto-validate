@@ -1,4 +1,4 @@
-import { validate, isGreaterThan, gt } from '../index';
+import { validate, isGreaterThan, gt } from '../src/index';
 import { expect } from 'chai';
 import 'mocha';
 

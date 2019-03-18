@@ -1,4 +1,4 @@
-import { validate, gt, type, matches, required } from '../index';
+import { validate, gt, type, matches, required } from '../src/index';
 import { expect } from 'chai';
 import 'mocha';
 

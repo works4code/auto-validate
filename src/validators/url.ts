@@ -14,7 +14,7 @@ export function isURL(value: string) {
  * @param options Validator Options
  */
 export function url(options?: IValidatorOptions) {
-    const message = 'The {display} is not a valid url.';
-    options = Object.assign({ arguments, message, type: 'url' }, options);
+    const message = "The {display} is not a valid url.";
+    options = Object.assign({ arguments, message, type: "url" }, options);
     return validator(isURL, options);
 }

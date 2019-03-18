@@ -12,7 +12,7 @@ user.email = 'i.yu@qq.com';
 const result = validate(user); 
 console.log(result.errors);
 
-// import { validate, required, display } from '../index';
+// import { validate, required, display } from '../src/index';
 
 // export class User {
 //     @display('username')
@@ -23,7 +23,7 @@ console.log(result.errors);
 // const result = validate(new User()); 
 // console.log(result.errors);
 
-// import { validate, validator } from '../index';
+// import { validate, validator } from '../src/index';
 
 // export class User {
 //     @validator((value: any) => value && value.length < 6, { message: 'The name is required and length must less than 10 digits.' })
@@ -35,7 +35,7 @@ console.log(result.errors);
 // const result = validate(user);
 // console.log(result.errors);
 
-// import { validate, validator, IValidatorOptions } from '../index';
+// import { validate, validator, IValidatorOptions } from '../src/index';
 
 // export function myValidator(length: number, options?: IValidatorOptions) {
 //     const message = 'The {name} is required and length must less than {$0} digits.';

@@ -1,6 +1,6 @@
+import { curryRight } from "../utils/index";
 import { IValidatorOptions } from "../validatorOptions";
-import { validator } from './validator';
-import { curryRight } from '../utils/index';
+import { validator } from "./validator";
 
 /**
  * Indicates whether or not the value is greater than other value.
@@ -17,8 +17,8 @@ export function isGreaterThan(value: any, other: any): boolean {
  * @param options Validator options.
  */
 export function gt(other: any, options?: IValidatorOptions) {
-    const message = 'The {display} must be greater than {$0}, current is {value}.';
-    options = Object.assign({ arguments, message, type: 'gt' }, options);
+    const message = "The {display} must be greater than {$0}, current is {value}.";
+    options = Object.assign({ arguments, message, type: "gt" }, options);
     const predicate = curryRight(isGreaterThan, other);
     return validator(predicate, options);
 }

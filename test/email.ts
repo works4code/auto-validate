@@ -1,4 +1,4 @@
-import { validate, email, isEmail } from '../index';
+import { validate, email, isEmail } from '../src/index';
 import { expect } from 'chai';
 import 'mocha';
 

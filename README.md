@@ -2,9 +2,13 @@
 Validate object by decorator in typescript.
 # Installation
 
->`$ npm install --save auto-validate`
+```
+$ npm install --save auto-validate
+```
 
 # Getting started
+> The current module relies on *reflect-metadata*. If you want to use it in  WeChat's miniprogram, add **global.Reflect = Reflect** to the app.js file.
+
 To enable experimental support for decorators, you must enable the experimentalDecorators compiler option either on the command line or in your tsconfig.json:
 ```
 import { validate, required, email } from 'auto-validate';
@@ -260,3 +264,8 @@ Map {
       } ]
 }
 ```
+# Update Logs
+* 1.0.1
+    * remove source code and reduce module size;
+    * and tslint;
+    * add secure-template module;

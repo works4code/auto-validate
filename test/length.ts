@@ -1,4 +1,4 @@
-import { validate, isLengthSatisfied, length } from '../index';
+import { validate, isLengthSatisfied, length } from '../src/index';
 import { expect } from 'chai';
 import 'mocha';
 

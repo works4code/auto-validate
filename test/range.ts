@@ -1,4 +1,4 @@
-import { validate, isInRange, range } from '../index';
+import { validate, isInRange, range } from '../src/index';
 import { expect } from 'chai';
 import 'mocha';
 

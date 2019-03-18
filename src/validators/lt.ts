@@ -1,6 +1,6 @@
+import { curryRight } from "../utils/index";
 import { IValidatorOptions } from "../validatorOptions";
-import { validator } from './validator';
-import { curryRight } from '../utils/index';
+import { validator } from "./validator";
 
 /**
  *  Returns a Boolean value that indicates whether or not the value is less than other or equal to value.
@@ -17,8 +17,8 @@ export function isLessThan(value: any, other: any): boolean {
  * @param options Validator options.
  */
 export function lt(other: any, options?: IValidatorOptions) {
-    const message = 'The {display} must be less than {$0}, current is {value}.';
-    options = Object.assign({ arguments, message, type: 'lt' }, options);
+    const message = "The {display} must be less than {$0}, current is {value}.";
+    options = Object.assign({ arguments, message, type: "lt" }, options);
     const predicate = curryRight(isLessThan, other);
     return validator(predicate, options);
 }

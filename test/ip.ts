@@ -1,4 +1,4 @@
-import { validate, isIP, ip } from '../index';
+import { validate, isIP, ip } from '../src/index';
 import { expect } from 'chai';
 import 'mocha';
 

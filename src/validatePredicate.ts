@@ -1,5 +1,4 @@
-export interface IValidatePredicate {
-    (
+export type IValidatePredicate = (
         /**
          * Current property's value.
          */
@@ -7,6 +6,5 @@ export interface IValidatePredicate {
         /**
          * Current object.
          */
-        target?: any
-    ): boolean
-}
+        target?: any,
+    ) => boolean;

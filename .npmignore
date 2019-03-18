@@ -3,3 +3,6 @@ example/
 package-lock.json
 webpack.*.js
 *.tgz
+src/
+tsconfig.json
+tslint.json

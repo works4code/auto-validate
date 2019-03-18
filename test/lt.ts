@@ -1,4 +1,4 @@
-import { validate, isLessThan, lt } from '../index';
+import { validate, isLessThan, lt } from '../src/index';
 import { expect } from 'chai';
 import 'mocha';
 

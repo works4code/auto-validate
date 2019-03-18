@@ -1,4 +1,4 @@
-import { validate, isEqual, equals } from '../index';
+import { validate, isEqual, equals } from '../src/index';
 import { expect } from 'chai';
 import 'mocha';
 

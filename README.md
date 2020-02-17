@@ -1,4 +1,4 @@
-# auto-mapping
+# auto-validate
 Validate object by decorator in typescript.
 # Installation
 
@@ -7,11 +7,9 @@ $ npm install --save auto-validate
 ```
 
 # Getting started
-> The current module relies on *reflect-metadata*. If you want to use it in  WeChat's miniprogram, add **global.Reflect = Reflect** to the app.js file.
-
 To enable experimental support for decorators, you must enable the experimentalDecorators compiler option either on the command line or in your tsconfig.json:
-```
-import { validate, required, email } from 'auto-validate';
+```ts
+import { validate, validateAsync, required, email } from 'auto-validate';
 
 export class User {
     @required()
@@ -22,11 +20,16 @@ export class User {
 
 const user = new User();
 user.email = 'i.yu@qq.com';
-const result = validate(user); 
+const result = validate(user); // or validate({},{ type: User });
 console.log(result.errors);
+
+//async
+validateAsync({ email:'i.yu@qq.com' }, { type:User })
+    .then(data=>console.log(data.email))
+    .catch(err=>console.error(err.errors))
 ```
 output:
-```
+```ts
 Map {
   'gender' => [ ValidateError {
       type: 'required',
@@ -41,12 +44,12 @@ Map {
 It will returns a ValidateResult object when calling the validate function.
 The ValidateResult object contains origin instance value and validation errors and some helper methods.
 * value(T): the validated instance object.
-    ```
+    ```ts
     const result=validate(someObj);
     result.value===someObj; // true
     ```
 * errors(Map<keyof T, any[]>): grouped errors.
-    ```
+    ```ts
     {
         property: [
             { type: errorType, message: errorMessage, ... },
@@ -58,7 +61,7 @@ The ValidateResult object contains origin instance value and validation errors a
 * getErrors(property: keyof T): get all errors by special property name.
 * getError(property: keyof T, errorType: string): get error by property name and error type.
 * hasError(property?: keyof T, errorType?: string): Determine if there is a specified type of error on a specified property. If the error type is omitted, it is judged whether there is any type of error on the specified property. If the property name is also omitted, it is judged whether or not it contains any error.
-    ```
+    ```ts
     const result=validate(someObj);
     // has any error on someObj?
     result.hasError();
@@ -73,7 +76,7 @@ The ValidateResult object contains origin instance value and validation errors a
 # Set display name
 Sometimes you may need to set the display name for some property in the error message which can use the decorator **@display('alias')**.
 > The default display name is the current property name(key).
-```
+```ts
 import { validate, required, display } from 'auto-validate';
 
 export class User {
@@ -86,7 +89,7 @@ const result = validate(new User());
 console.log(result.errors);
 ```
 output:
-```
+```ts
 Map {
   'name' => [ ValidateError {
       type: 'required',
@@ -205,7 +208,7 @@ You can customize the validator when the built-in validator does not meet your n
 >The function signature of the validator's predicate function is 
 **(value:any, instance:object): boolean** the value is current property value and the instance is current validated instance object.
  
-```
+```ts
 import { validate, validator } from 'auto-validate';
 
 export class User {
@@ -219,7 +222,7 @@ const result = validate(user);
 console.log(result.errors);
 ```
 output:
-```
+```ts
 Map {
   'name' => [ ValidateError {
       type: 'default',
@@ -231,7 +234,7 @@ Map {
 }
 ```
 If you want to use the same validator in other places, we can do like this.
-```
+```ts
 import { validate, validator, IValidatorOptions } from 'auto-validate';
 
 export function myValidator(length: number, options?: IValidatorOptions) {
@@ -252,7 +255,7 @@ const result = validate(user);
 console.log(result.errors);
 ```
 output:
-```
+```ts
 Map {
   'name' => [ ValidateError {
       type: 'myType',
@@ -265,7 +268,11 @@ Map {
 }
 ```
 # Update Logs
+* 1.0.2
+    * added asynchronous funciton **validateAsync**;
+    * added tslib;
+    * added specified object's type option **{type?: string}**;
 * 1.0.1
     * remove source code and reduce module size;
-    * and tslint;
-    * add secure-template module;
+    * added tslint;
+    * added secure-template module;

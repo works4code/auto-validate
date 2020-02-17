@@ -1,6 +1,6 @@
 export interface IValidateOptions {
     /**
-     * the type of validate result error, default is object.
+     * the type of instance
      */
-    type: "string" | "object";
+    type?: Function;
 }

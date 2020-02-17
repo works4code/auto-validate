@@ -1,18 +1,22 @@
 import { REQUIRED_VALIDATE_PROPERYIES, VALIDATORS } from "./constants";
-import { ArrayHelper, pushByOrder } from "./utils";
+import { ArrayHelper, pushByOrder, Reflect } from "./utils";
 import { ValidateError } from "./validateError";
 import { IValidateOptions } from "./validateOptions";
 import { ValidateResult } from "./validateResult";
 
 /**
- * Validate instance objects and generate results with errors.
- * @param instance validated object which decorated by validator decorations.
+ * Validate objects and generate results with errors.
+ * @param instance validated object.
  * @param options validate options
  */
 export function validate<T>(instance: T, options?: IValidateOptions): ValidateResult<T> {
-    const properties: Set<string> = Reflect.getMetadata(REQUIRED_VALIDATE_PROPERYIES, instance) || [];
+    let target = instance;
+    if (options && options.type && typeof options.type === "function") {
+        target = options.type.prototype;
+    }
+    const properties: Set<string> = Reflect.getMetadata(REQUIRED_VALIDATE_PROPERYIES, target) || [];
     const errors = ArrayHelper.from(properties)
-        .map((key) => Reflect.getMetadata(VALIDATORS, instance, key as string) as Map<string, Function>)
+        .map((key) => Reflect.getMetadata(VALIDATORS, target, key as string) as Map<string, Function>)
         .map((value) => value.values())
         .flatten<Function>()
         .reduce((result, validateFn) => {
@@ -25,6 +29,21 @@ export function validate<T>(instance: T, options?: IValidateOptions): ValidateRe
                 }
             }
             return result;
-        }, new Map<keyof T, Array<ValidateError<T>>>());
+        }, new Map<any, Array<ValidateError<T>>>());
     return new ValidateResult(instance, errors);
+}
+
+/**
+ * Validate object and generate results with errors asynchronously.
+ * @param instance validated object.
+ * @param options validated options.
+ */
+export function validateAsync<T>(instance: T, options?: IValidateOptions): Promise<T> {
+    try {
+        const result = validate(instance, options);
+        if (result.hasError()) { return Promise.reject(result); }
+        return Promise.resolve(result.value);
+    } catch (error) {
+        return Promise.reject(error);
+    }
 }

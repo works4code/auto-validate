@@ -1,4 +1,5 @@
 import { REQUIRED_VALIDATE_PROPERYIES, VALIDATORS } from "../constants";
+import { Reflect } from "../utils/index";
 import { ValidateError } from "../validateError";
 import { IValidatePredicate } from "../validatePredicate";
 import { IValidatorOptions } from "../validatorOptions";

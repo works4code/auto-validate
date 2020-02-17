@@ -1,5 +1,5 @@
-import "reflect-metadata";
 export * from "./validators/index";
-export { validate } from "./validate";
+export { validate, validateAsync } from "./validate";
 export { display } from "./display";
+export { ValidateResult } from "./validateResult";
 export { IValidatorOptions } from "./validatorOptions";

@@ -1,7 +1,7 @@
+import { format } from "secure-template";
 import { DISPLAY_NAME } from "./constants";
-import { ArrayHelper, isArrayLike } from "./utils";
+import { ArrayHelper, isArrayLike, Reflect } from "./utils";
 import { IValidatorOptions } from "./validatorOptions";
-import { format } from 'secure-template';
 
 export class ValidateError<T = any> implements IValidatorOptions {
     [x: string]: any;

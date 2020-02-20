@@ -19,8 +19,7 @@ export function isGreaterThanOrEqualTo(value: any, other: any): boolean {
  * @param options Validator options.
  */
 export function gte(other: any, options?: IValidatorOptions) {
-    const message = "The {display} must be greater than or equal to {$0}, current is {value}.";
-    options = Object.assign({ arguments, message, type: "gte" }, options);
+    options = Object.assign({ arguments, type: "gte" }, options);
     const predicate = curryRight(isGreaterThanOrEqualTo, other);
     return validator(predicate, options);
 }

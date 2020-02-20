@@ -103,7 +103,7 @@ function validator(predicate, options) {
     return function (target, name) {
         var validators = index_1.Reflect.getMetadata(constants_1.VALIDATORS, target, name) || new Map();
         var properties = index_1.Reflect.getMetadata(constants_1.REQUIRED_VALIDATE_PROPERYIES, target) || new Set();
-        var message = "Verification failed.";
+        var message = constants_1.DEFAULT_ERROR_MEESSAGES[options && options.type] || "Verification failed.";
         options = Object.assign({ message: message, type: "default", order: validators.size }, options);
         var fn = function (obj) {
             var valid = predicate(obj[name], obj);
@@ -160,6 +160,23 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.VALIDATORS = Symbol("Validators");
 exports.DISPLAY_NAME = Symbol("Display name symbol");
 exports.REQUIRED_VALIDATE_PROPERYIES = Symbol("All properties rquired to be validate");
+exports.DEFAULT_ERROR_MEESSAGES = {
+    contains: "The {display} is not contains {$0}.",
+    email: "The {display} is not the correct email address format.",
+    equals: "The {display} is not equal to {$0}.",
+    gt: "The {display} must be greater than {$0}, current is {value}.",
+    gte: "The {display} must be greater than or equal to {$0}, current is {value}.",
+    ip: "The {display} is a invalid IP address.",
+    length: "The {display} length does not match.",
+    lt: "The {display} must be less than {$0}, current is {value}.",
+    lte: "The {display} must be less than or equal to {$0}, current is {value}.",
+    matches: "The {display} does not match the requested format.",
+    numeric: "The {display} is not a numeric type.",
+    range: "The {display} must be between {$0} and {$1}.",
+    required: "The {display} is required.",
+    type: "The {display} must be a {$0} type.",
+    url: "The {display} is not a valid url.",
+};
 
 
 /***/ }),
@@ -193,8 +210,7 @@ exports.isEqual = isEqual;
  * @param options Validator options.
  */
 function equals(other, options) {
-    var message = "The {display} is not equal to {$0}.";
-    options = Object.assign({ arguments: arguments, message: message, type: "equals" }, options);
+    options = Object.assign({ arguments: arguments, type: "equals" }, options);
     var predicate = function (value, target) {
         other = typeof other === "function" ? other(target) : other;
         options.arguments[0] = other;
@@ -229,8 +245,7 @@ exports.isGreaterThan = isGreaterThan;
  * @param options Validator options.
  */
 function gt(other, options) {
-    var message = "The {display} must be greater than {$0}, current is {value}.";
-    options = Object.assign({ arguments: arguments, message: message, type: "gt" }, options);
+    options = Object.assign({ arguments: arguments, type: "gt" }, options);
     var predicate = index_1.curryRight(isGreaterThan, other);
     return validator_1.validator(predicate, options);
 }
@@ -298,8 +313,7 @@ exports.isInRange = isInRange;
  * @param options Validator options.
  */
 function range(start, end, options) {
-    var message = "The {display} must be between {$0} and {$1}.";
-    options = Object.assign({ arguments: arguments, message: message, type: "range" }, options);
+    options = Object.assign({ arguments: arguments, type: "range" }, options);
     var predicate = index_1.curryRight(isInRange, start, end);
     return validator_1.validator(predicate, options);
 }
@@ -340,8 +354,7 @@ exports.isMatch = isMatch;
  */
 function matches(pattern, options) {
     var predicate = index_1.curryRight(isMatch, pattern, options);
-    var message = "The {display} does not match the requested format.";
-    options = Object.assign({ arguments: arguments, message: message, type: "matches" }, options);
+    options = Object.assign({ arguments: arguments, type: "matches" }, options);
     return validator_1.validator(predicate, options);
 }
 exports.matches = matches;
@@ -359,6 +372,9 @@ var ValidateResult = /** @class */ (function () {
     function ValidateResult(value, errors) {
         this.errors = errors;
         this.value = value;
+        if (this.hasError()) {
+            this.message = this.toSingle().message;
+        }
     }
     /**
      * Get all errors by special property name.
@@ -922,8 +938,7 @@ exports.isGreaterThanOrEqualTo = isGreaterThanOrEqualTo;
  * @param options Validator options.
  */
 function gte(other, options) {
-    var message = "The {display} must be greater than or equal to {$0}, current is {value}.";
-    options = Object.assign({ arguments: arguments, message: message, type: "gte" }, options);
+    options = Object.assign({ arguments: arguments, type: "gte" }, options);
     var predicate = index_1.curryRight(isGreaterThanOrEqualTo, other);
     return validator_1.validator(predicate, options);
 }
@@ -975,9 +990,8 @@ exports.isContain = isContain;
  */
 function contains(value, position, options) {
     if (position === void 0) { position = 0; }
-    var message = "The {display} is not contains {$0}.";
     var predicate = index_1.curryRight(isContain, value, position);
-    options = Object.assign({ arguments: arguments, message: message, type: "contains" }, options);
+    options = Object.assign({ arguments: arguments, type: "contains" }, options);
     return validator_1.validator(predicate, options);
 }
 exports.contains = contains;
@@ -1004,8 +1018,7 @@ exports.isEmail = isEmail;
  * @param options Validator options
  */
 function email(options) {
-    var message = "The {display} is not the correct email address format.";
-    options = Object.assign({ arguments: arguments, message: message, type: "email" }, options);
+    options = Object.assign({ arguments: arguments, type: "email" }, options);
     return validator_1.validator(isEmail, options);
 }
 exports.email = email;
@@ -1044,9 +1057,8 @@ exports.isIP = isIP;
  * @param options Validator options.
  */
 function ip(options) {
-    var message = "The {display} is a invalid IP address.";
     var predicate = index_1.curryRight(isIP, options);
-    options = Object.assign({ arguments: arguments, message: message, type: "ip" }, options);
+    options = Object.assign({ arguments: arguments, type: "ip" }, options);
     return validator_1.validator(predicate, options);
 }
 exports.ip = ip;
@@ -1098,8 +1110,7 @@ exports.isLengthSatisfied = isLengthSatisfied;
  */
 function length(options) {
     var predicate = index_1.curryRight(isLengthSatisfied, options);
-    var message = "The {display} length does not match.";
-    options = Object.assign({ arguments: arguments, message: message, type: "length" }, options);
+    options = Object.assign({ arguments: arguments, type: "length" }, options);
     return validator_1.validator(predicate, options);
 }
 exports.length = length;
@@ -1129,8 +1140,7 @@ exports.isLessThan = isLessThan;
  * @param options Validator options.
  */
 function lt(other, options) {
-    var message = "The {display} must be less than {$0}, current is {value}.";
-    options = Object.assign({ arguments: arguments, message: message, type: "lt" }, options);
+    options = Object.assign({ arguments: arguments, type: "lt" }, options);
     var predicate = index_1.curryRight(isLessThan, other);
     return validator_1.validator(predicate, options);
 }
@@ -1161,8 +1171,7 @@ exports.isLessThanOrEqualTo = isLessThanOrEqualTo;
  * @param options Validator options.
  */
 function lte(other, options) {
-    var message = "The {display} must be less than or equal to {$0}, current is {value}.";
-    options = Object.assign({ arguments: arguments, message: message, type: "lte" }, options);
+    options = Object.assign({ arguments: arguments, type: "lte" }, options);
     var predicate = index_1.curryRight(isLessThanOrEqualTo, other);
     return validator_1.validator(predicate, options);
 }
@@ -1232,8 +1241,7 @@ exports.isRequired = isRequired;
  * @param options Validator options.
  */
 function required(options) {
-    var message = "The {display} is required.";
-    options = Object.assign({ arguments: arguments, message: message, type: "required" }, options);
+    options = Object.assign({ arguments: arguments, type: "required" }, options);
     var predicate = utils_1.curryRight(isRequired, options);
     return validator_1.validator(predicate, options);
 }
@@ -1261,8 +1269,7 @@ exports.isURL = isURL;
  * @param options Validator Options
  */
 function url(options) {
-    var message = "The {display} is not a valid url.";
-    options = Object.assign({ arguments: arguments, message: message, type: "url" }, options);
+    options = Object.assign({ arguments: arguments, type: "url" }, options);
     return validator_1.validator(isURL, options);
 }
 exports.url = url;
@@ -1303,8 +1310,7 @@ exports.isNumeric = isNumeric;
  * @param options Validator Options
  */
 function numeric(options) {
-    var message = "The {display} is not a numeric type.";
-    options = Object.assign({ arguments: arguments, message: message, type: "numeric" }, options);
+    options = Object.assign({ arguments: arguments, type: "numeric" }, options);
     return validator_1.validator(isNumeric, options);
 }
 exports.numeric = numeric;
@@ -1333,8 +1339,7 @@ exports.isType = isType;
  * @param options Validator Options
  */
 function type(typeName, options) {
-    var message = "The {display} must be a {$0} type.";
-    options = Object.assign({ arguments: arguments, message: message, type: "type" }, options);
+    options = Object.assign({ arguments: arguments, type: "type" }, options);
     var predicate = utils_1.curryRight(isType, typeName);
     return validator_1.validator(predicate, options);
 }

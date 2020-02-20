@@ -25,7 +25,6 @@ export function isNumeric(value: any): boolean {
  * @param options Validator Options
  */
 export function numeric(options?: IValidatorOptions) {
-    const message = "The {display} is not a numeric type.";
-    options = Object.assign({ arguments, message, type: "numeric" }, options);
+    options = Object.assign({ arguments, type: "numeric" }, options);
     return validator(isNumeric, options);
 }

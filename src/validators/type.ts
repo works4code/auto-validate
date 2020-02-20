@@ -16,8 +16,7 @@ export function isType(value: any, typeName: string) {
  * @param options Validator Options
  */
 export function type(typeName: string, options?: IValidatorOptions) {
-    const message = "The {display} must be a {$0} type.";
-    options = Object.assign({ arguments, message, type: "type" }, options);
+    options = Object.assign({ arguments, type: "type" }, options);
     const predicate = curryRight(isType, typeName);
     return validator(predicate, options);
 }

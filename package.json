@@ -1,6 +1,6 @@
 {
   "name": "auto-validate",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "validate object by decorators in typescript",
   "main": "index.js",
   "sideEffects": false,
@@ -36,7 +36,7 @@
   "devDependencies": {
     "@types/chai": "^4.2.9",
     "@types/mocha": "^5.2.7",
-    "bundle-dts": "^1.1.1",
+    "bundle-dts": "^1.1.2",
     "chai": "^4.2.0",
     "mocha": "^6.2.2",
     "ts-loader": "^5.4.5",

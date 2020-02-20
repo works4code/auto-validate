@@ -41,8 +41,7 @@ export function isRequired(value: any, options?: IRequiredValidatorOptions) {
  * @param options Validator options.
  */
 export function required(options?: IRequiredValidatorOptions & IValidatorOptions) {
-    const message = "The {display} is required.";
-    options = Object.assign({ arguments, message, type: "required" }, options);
+    options = Object.assign({ arguments, type: "required" }, options);
     const predicate = curryRight(isRequired, options);
     return validator(predicate, options);
 }

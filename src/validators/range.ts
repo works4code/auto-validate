@@ -19,8 +19,7 @@ export function isInRange<T = any>(value: T, start: T, end: T) {
  * @param options Validator options.
  */
 export function range(start: any, end: any, options?: IValidatorOptions) {
-    const message = "The {display} must be between {$0} and {$1}.";
-    options = Object.assign({ arguments, message, type: "range" }, options);
+    options = Object.assign({ arguments, type: "range" }, options);
     const predicate = curryRight(isInRange, start, end);
     return validator(predicate, options);
 }

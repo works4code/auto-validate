@@ -31,8 +31,7 @@ export function isIP(value: string, options?: IIPValidatorOptions) {
  * @param options Validator options.
  */
 export function ip(options?: IIPValidatorOptions & IValidatorOptions) {
-    const message = "The {display} is a invalid IP address.";
     const predicate = curryRight(isIP, options);
-    options = Object.assign({ arguments, message, type: "ip" }, options);
+    options = Object.assign({ arguments, type: "ip" }, options);
     return validator(predicate as any, options);
 }

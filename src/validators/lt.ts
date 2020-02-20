@@ -17,8 +17,7 @@ export function isLessThan(value: any, other: any): boolean {
  * @param options Validator options.
  */
 export function lt(other: any, options?: IValidatorOptions) {
-    const message = "The {display} must be less than {$0}, current is {value}.";
-    options = Object.assign({ arguments, message, type: "lt" }, options);
+    options = Object.assign({ arguments, type: "lt" }, options);
     const predicate = curryRight(isLessThan, other);
     return validator(predicate, options);
 }

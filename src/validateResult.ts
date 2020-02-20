@@ -9,9 +9,16 @@ export class ValidateResult<T> {
      * The validated instance object.
      */
     public value: T;
+    /**
+     * The first's error message
+     */
+    public message: string;
     constructor(value: T, errors: Map<keyof T, ValidateError[]>) {
         this.errors = errors;
         this.value = value;
+        if (this.hasError()) {
+            this.message = this.toSingle().message;
+        }
     }
     /**
      * Get all errors by special property name.

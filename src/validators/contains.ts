@@ -10,7 +10,7 @@ import { validator } from "./validator";
  * @param position The index at which to begin searching the collection.
  * If omitted, search starts at the beginning of the collection.
  */
-export function isContain<T= any>(collection: string | ArrayLike<T> | object, value: T, position = 0) {
+export function isContain<T = any>(collection: string | ArrayLike<T> | object, value: T, position = 0) {
     if (typeof collection === "string") {
         return collection.indexOf(value as any, position) > -1;
     } else if (isArrayLike(collection)) {
@@ -34,8 +34,7 @@ export function isContain<T= any>(collection: string | ArrayLike<T> | object, va
  * @param options Validator options.
  */
 export function contains(value: any, position = 0, options?: IValidatorOptions) {
-    const message = "The {display} is not contains {$0}.";
     const predicate = curryRight(isContain, value, position);
-    options = Object.assign({ arguments, message, type: "contains" }, options);
+    options = Object.assign({ arguments, type: "contains" }, options);
     return validator(predicate, options);
 }

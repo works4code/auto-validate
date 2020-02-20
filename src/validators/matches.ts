@@ -32,7 +32,6 @@ export function isMatch(value: string, pattern: RegExp | string, options?: IMatc
  */
 export function matches(pattern: RegExp | string, options?: IMatchValidatorOptions & IValidatorOptions) {
     const predicate = curryRight(isMatch, pattern, options);
-    const message = "The {display} does not match the requested format.";
-    options = Object.assign({ arguments, message, type: "matches" }, options);
+    options = Object.assign({ arguments, type: "matches" }, options);
     return validator(predicate as any, options);
 }

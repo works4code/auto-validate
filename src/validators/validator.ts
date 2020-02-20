@@ -1,4 +1,4 @@
-import { REQUIRED_VALIDATE_PROPERYIES, VALIDATORS } from "../constants";
+import { DEFAULT_ERROR_MEESSAGES, REQUIRED_VALIDATE_PROPERYIES, VALIDATORS } from "../constants";
 import { Reflect } from "../utils/index";
 import { ValidateError } from "../validateError";
 import { IValidatePredicate } from "../validatePredicate";
@@ -13,7 +13,7 @@ export function validator(predicate: IValidatePredicate, options: IValidatorOpti
     return function(target: any, name: string) {
         const validators: Map<string, Function> = Reflect.getMetadata(VALIDATORS, target, name) || new Map();
         const properties: Set<string> = Reflect.getMetadata(REQUIRED_VALIDATE_PROPERYIES, target) || new Set();
-        const message = "Verification failed.";
+        const message = (DEFAULT_ERROR_MEESSAGES as any)[options && options.type] || "Verification failed.";
         options = Object.assign({ message, type: "default", order: validators.size }, options);
         const fn = function(obj: any) {
             const valid = predicate(obj[name], obj);

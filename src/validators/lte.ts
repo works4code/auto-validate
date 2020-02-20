@@ -17,8 +17,7 @@ export function isLessThanOrEqualTo(value: any, other: any) {
  * @param options Validator options.
  */
 export function lte(other: any, options?: IValidatorOptions) {
-    const message = "The {display} must be less than or equal to {$0}, current is {value}.";
-    options = Object.assign({ arguments, message, type: "lte" }, options);
+    options = Object.assign({ arguments, type: "lte" }, options);
     const predicate = curryRight(isLessThanOrEqualTo, other);
     return validator(predicate, options);
 }

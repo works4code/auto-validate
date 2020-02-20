@@ -53,7 +53,6 @@ export function isLengthSatisfied(value: any, options: ILengthValidatorOptions) 
  */
 export function length(options: ILengthValidatorOptions & IValidatorOptions) {
     const predicate = curryRight(isLengthSatisfied, options);
-    const message = "The {display} length does not match.";
-    options = Object.assign({ arguments, message, type: "length" }, options);
+    options = Object.assign({ arguments, type: "length" }, options);
     return validator(predicate, options);
 }

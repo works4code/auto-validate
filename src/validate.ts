@@ -29,7 +29,7 @@ export function validate<T>(instance: T, options?: IValidateOptions): ValidateRe
                 }
             }
             return result;
-        }, new Map<any, Array<ValidateError<T>>>());
+        }, new Map<any, ValidateError<T>[]>());
     return new ValidateResult(instance, errors);
 }
 

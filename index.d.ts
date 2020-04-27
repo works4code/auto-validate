@@ -105,6 +105,17 @@ declare module "auto-validate/src/validateError" {
          */
         order: number;
         constructor(target: any, name: keyof T, options: IValidatorOptions);
+        /**
+         * Set the error message
+         * @param template The template of error message
+         */
+        setMessage(template: string): void;
+        /**
+         * Set the error message from template object.
+         * @param templates The template object.
+         * @param selector The key selector
+         */
+        setMessageFromObject(templates: Record<string, string>, selector?: (error: ValidateError) => string): void;
         toString(): string;
     }
 }
@@ -429,6 +440,16 @@ declare module "auto-validate/src/validateOptions" {
          * the type of instance
          */
         type?: Function;
+        /**
+         * error meesage object, the key is `${display}.${type}`.
+         * @example { "name.required" : "The name field is required." }
+         */
+        messages?: Record<string, string>;
+        /**
+         * the key selector of error meesage object.
+         * @default error=>`${error.display}.${error.type}`;
+         */
+        selector?: (error: any) => string;
     }
 }
 declare module "auto-validate/src/validateResult" {

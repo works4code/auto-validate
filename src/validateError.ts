@@ -29,6 +29,7 @@ export class ValidateError<T = any> implements IValidatorOptions {
      * The error sequence number. the default is the order in which the decorators are added.
      */
     public order: number = 0;
+
     constructor(target: any, name: keyof T, options: IValidatorOptions) {
         this.type = options.type;
         this.name = name;
@@ -38,8 +39,29 @@ export class ValidateError<T = any> implements IValidatorOptions {
         if (isArrayLike(options.arguments)) {
             ArrayHelper.from(options.arguments).forEach((val, idx) => this[`$${idx}`] = val);
         }
-        this.message = format(options.message, this);
+        this.setMessage(options.message);
     }
+
+    /**
+     * Set the error message
+     * @param template The template of error message
+     */
+    public setMessage(template: string) {
+        if (typeof template !== 'string') return;
+        this.message = format(template, this);
+    }
+
+    /**
+     * Set the error message from template object.
+     * @param templates The template object.
+     * @param selector The key selector
+     */
+    public setMessageFromObject(templates: Record<string, string>, selector?: (error: ValidateError) => string) {
+        selector = typeof selector === 'function' ? selector : err => `${err.display}.${err.type}`;
+        const key = selector(this);
+        this.setMessage(templates[key]);
+    }
+
     public toString() {
         return this.message;
     }

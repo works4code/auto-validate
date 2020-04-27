@@ -277,8 +277,27 @@ var ValidateError = /** @class */ (function () {
         if (utils_1.isArrayLike(options.arguments)) {
             utils_1.ArrayHelper.from(options.arguments).forEach(function (val, idx) { return _this["$" + idx] = val; });
         }
-        this.message = secure_template_1.format(options.message, this);
+        this.setMessage(options.message);
     }
+    /**
+     * Set the error message
+     * @param template The template of error message
+     */
+    ValidateError.prototype.setMessage = function (template) {
+        if (typeof template !== 'string')
+            return;
+        this.message = secure_template_1.format(template, this);
+    };
+    /**
+     * Set the error message from template object.
+     * @param templates The template object.
+     * @param selector The key selector
+     */
+    ValidateError.prototype.setMessageFromObject = function (templates, selector) {
+        selector = typeof selector === 'function' ? selector : function (err) { return err.display + "." + err.type; };
+        var key = selector(this);
+        this.setMessage(templates[key]);
+    };
     ValidateError.prototype.toString = function () {
         return this.message;
     };
@@ -1373,8 +1392,14 @@ function validate(instance, options) {
         .map(function (value) { return value.values(); })
         .flatten()
         .reduce(function (result, validateFn) {
-        var error = validateFn(instance);
+        var error = validateFn(instance, options);
         if (error instanceof validateError_1.ValidateError) {
+            if (options && options.messages) {
+                if (Object.prototype.toString.call(options.messages) !== "[object Object]") {
+                    throw new TypeError("The parameter \"templates\" must be the object type.");
+                }
+                error.setMessageFromObject(options.messages, options.selector);
+            }
             if (!result.has(error.name)) {
                 result.set(error.name, [error]);
             }

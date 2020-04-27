@@ -16,12 +16,18 @@ export function validate<T>(instance: T, options?: IValidateOptions): ValidateRe
     }
     const properties: Set<string> = Reflect.getMetadata(REQUIRED_VALIDATE_PROPERYIES, target) || [];
     const errors = ArrayHelper.from(properties)
-        .map((key) => Reflect.getMetadata(VALIDATORS, target, key as string) as Map<string, Function>)
+        .map((key) => Reflect.getMetadata(VALIDATORS, target, key) as Map<string, Function>)
         .map((value) => value.values())
         .flatten<Function>()
         .reduce((result, validateFn) => {
-            const error = validateFn(instance) as ValidateError<T>;
+            const error = validateFn(instance, options) as ValidateError<T>;
             if (error instanceof ValidateError) {
+                if (options && options.messages) {
+                    if (Object.prototype.toString.call(options.messages) !== "[object Object]") {
+                        throw new TypeError(`The parameter "templates" must be the object type.`);
+                    }
+                    error.setMessageFromObject(options.messages, options.selector);
+                }
                 if (!result.has(error.name)) {
                     result.set(error.name, [error]);
                 } else {

@@ -100,7 +100,35 @@ Map {
     } ] 
 }
 ```
+# Precondition
+Verification will only be performed if the preconditions are met. The condition inside the validator has priority over the decorator.
+```ts
+import { validate, required, email, precondition } from 'auto-validate';
 
+export class User {
+    // excute any validation if precondition return true.
+    @precondition(param=>param.allowValidateGender)
+    @required()
+    gender: boolean;
+    // excute any validation if precondition return true.
+    @precondition(param=>param.allowValidateEmail)
+    @email()
+    // always excute required validation.
+    @required({ precondition:()=>true })
+    email: string;
+}
+
+// validate with predictionParam
+validate(new User(), { predictionParam:{ allowValidateGender:true }});
+```
+## Precondition function signature
+```ts
+/**
+ * @param param The predictionParam from validate options.
+ * @param instance The instance of current class.
+ **/
+function (param?, instance?) : boolean {}
+```
 # Built-in validators
 ## @contains(value: any, position = 0, options?: IValidatorOptions)
 Checks if current property value is a collection include the special value or is object include the special key. If collection is a string, it's checked for a substring of value.
@@ -268,6 +296,10 @@ Map {
 }
 ```
 # Update Logs
+* 1.2.0
+    * added `precondition` option;
+    * added `order` option;
+    * added decorator `precondition`;
 * 1.0.2
     * added asynchronous funciton **validateAsync**;
     * added tslib;

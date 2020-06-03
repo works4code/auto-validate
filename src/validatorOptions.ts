@@ -9,4 +9,12 @@ export interface IValidatorOptions extends Record<string, any> {
      * When using multiple custom validators, please define multiple different types.
      */
     type?: string;
+    /**
+     * The precondition to validate.
+     */
+    precondition?: (param?, instance?) => boolean;
+    /**
+     * The order to validate.
+     */
+    order?: number;
 }

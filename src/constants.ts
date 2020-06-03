@@ -1,6 +1,6 @@
-export const VALIDATORS = Symbol("Validators");
-export const DISPLAY_NAME = Symbol("Display name symbol");
-export const REQUIRED_VALIDATE_PROPERYIES = Symbol("All properties rquired to be validate");
+export const VALIDATORS = Symbol("Validators symbol key");
+export const DISPLAY_NAME = Symbol("Display name symbol key");
+export const PRECONDITION = Symbol('Precondition symbol key');
 export const DEFAULT_ERROR_MEESSAGES = {
     contains: "The {display} is not contains {$0}.",
     email: "The {display} is not the correct email address format.",

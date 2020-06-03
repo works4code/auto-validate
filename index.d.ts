@@ -5,27 +5,8 @@ declare module "auto-validate/src/utils/curry" {
 declare module "auto-validate/src/utils/isArrayLike" {
     export function isArrayLike(value: any): boolean;
 }
-declare module "auto-validate/src/utils/isIterator" {
-    export function isIterable(obj: any): boolean;
-}
-declare module "auto-validate/src/utils/array" {
-    export class ArrayHelper<T = any> {
-        static from<T = any>(iterable: Iterable<T>): ArrayHelper<T>;
-        private values;
-        constructor(iterable: Iterable<T>);
-        flatten<R>(): ArrayHelper<R>;
-        filter(predicate: (value: T, index?: number) => boolean): ArrayHelper<T>;
-        forEach(func: (value: T, index?: number) => void): void;
-        map<R>(func: (value: T, index?: number) => R): ArrayHelper<R>;
-        reduce<R>(func: (result: R, value: T, index?: number) => R, seed: R): R;
-        valueOf(): T[];
-    }
-}
 declare module "auto-validate/src/utils/isNil" {
     export function isNil(value: any): boolean;
-}
-declare module "auto-validate/src/utils/pushByOrder" {
-    export function pushByOrder<T = any>(collection: T[], value: T, orderBy: keyof T): T[];
 }
 declare module "auto-validate/src/utils/reflect" {
     import "reflect-metadata";
@@ -35,9 +16,7 @@ declare module "auto-validate/src/utils/reflect" {
 declare module "auto-validate/src/utils/index" {
     export { curryRight } from "auto-validate/src/utils/curry";
     export { isArrayLike } from "auto-validate/src/utils/isArrayLike";
-    export { ArrayHelper } from "auto-validate/src/utils/array";
     export { isNil } from "auto-validate/src/utils/isNil";
-    export { pushByOrder } from "auto-validate/src/utils/pushByOrder";
     import Reflect from "auto-validate/src/utils/reflect";
     export { Reflect };
 }
@@ -52,12 +31,20 @@ declare module "auto-validate/src/validatorOptions" {
          * When using multiple custom validators, please define multiple different types.
          */
         type?: string;
+        /**
+         * The precondition to validate.
+         */
+        precondition?: (param?: any, instance?: any) => boolean;
+        /**
+         * The order to validate.
+         */
+        order?: number;
     }
 }
 declare module "auto-validate/src/constants" {
     export const VALIDATORS: unique symbol;
     export const DISPLAY_NAME: unique symbol;
-    export const REQUIRED_VALIDATE_PROPERYIES: unique symbol;
+    export const PRECONDITION: unique symbol;
     export const DEFAULT_ERROR_MEESSAGES: {
         contains: string;
         email: string;
@@ -76,49 +63,6 @@ declare module "auto-validate/src/constants" {
         url: string;
     };
 }
-declare module "auto-validate/src/validateError" {
-    import { IValidatorOptions } from "auto-validate/src/validatorOptions";
-    export class ValidateError<T = any> implements IValidatorOptions {
-        [x: string]: any;
-        /**
-         * The validator's type, such as 'required','length'.
-         */
-        type: string;
-        /**
-         * The error message
-         */
-        message: string;
-        /**
-         * The property's name.
-         */
-        name: keyof T;
-        /**
-         * The property's display name.
-         */
-        display: string;
-        /**
-         * The property's value.
-         */
-        value: any;
-        /**
-         * The error sequence number. the default is the order in which the decorators are added.
-         */
-        order: number;
-        constructor(target: any, name: keyof T, options: IValidatorOptions);
-        /**
-         * Set the error message
-         * @param template The template of error message
-         */
-        setMessage(template: string): void;
-        /**
-         * Set the error message from template object.
-         * @param templates The template object.
-         * @param selector The key selector
-         */
-        setMessageFromObject(templates: Record<string, string>, selector?: (error: ValidateError) => string): void;
-        toString(): string;
-    }
-}
 declare module "auto-validate/src/validatePredicate" {
     export type IValidatePredicate = (
     /**
@@ -129,6 +73,15 @@ declare module "auto-validate/src/validatePredicate" {
      * Current object.
      */
     target?: any) => boolean;
+}
+declare module "auto-validate/src/validateInfo" {
+    import { IValidatePredicate } from 'auto-validate/src/validatePredicate';
+    import { IValidatorOptions } from 'auto-validate/src/validatorOptions';
+    export interface IValidateInfo {
+        predicate: IValidatePredicate;
+        options: IValidatorOptions;
+        name: string;
+    }
 }
 declare module "auto-validate/src/validators/validator" {
     import { IValidatePredicate } from "auto-validate/src/validatePredicate";
@@ -434,6 +387,50 @@ declare module "auto-validate/src/validators/index" {
     export * from "auto-validate/src/validators/numeric";
     export * from "auto-validate/src/validators/type";
 }
+declare module "auto-validate/src/validateError" {
+    import { IValidatorOptions } from "auto-validate/src/validatorOptions";
+    import { IValidateInfo } from 'auto-validate/src/validateInfo';
+    export class ValidateError<T = any> implements IValidatorOptions {
+        [x: string]: any;
+        /**
+         * The validator's type, such as 'required','length'.
+         */
+        type: string;
+        /**
+         * The error message
+         */
+        message: string;
+        /**
+         * The property's name.
+         */
+        name: keyof T;
+        /**
+         * The property's display name.
+         */
+        display: string;
+        /**
+         * The property's value.
+         */
+        value: any;
+        /**
+         * The error sequence number.
+         */
+        order: number;
+        constructor(target: any, order: number, validator: IValidateInfo);
+        /**
+         * Set the error message
+         * @param template The template of error message
+         */
+        setMessage(template: string): void;
+        /**
+         * Set the error message from template object.
+         * @param templates The template object.
+         * @param selector The key selector
+         */
+        setMessageFromObject(templates: Record<string, string>, selector?: (error: ValidateError) => string): this;
+        toString(): string;
+    }
+}
 declare module "auto-validate/src/validateOptions" {
     export interface IValidateOptions {
         /**
@@ -450,6 +447,10 @@ declare module "auto-validate/src/validateOptions" {
          * @default error=>`${error.display}.${error.type}`;
          */
         selector?: (error: any) => string;
+        /**
+         * the param for precondition function
+         */
+        preconditionParam?: object;
     }
 }
 declare module "auto-validate/src/validateResult" {
@@ -467,7 +468,7 @@ declare module "auto-validate/src/validateResult" {
          * The first's error message
          */
         message: string;
-        constructor(value: T, errors: Map<keyof T, ValidateError[]>);
+        constructor(value: T, errors: ValidateError[]);
         /**
          * Get all errors by special property name.
          * @param property property name
@@ -525,10 +526,14 @@ declare module "auto-validate/src/display" {
      */
     export function display(name: string): (target: any, originName: string) => void;
 }
+declare module "auto-validate/src/precondition" {
+    export function precondition(predicate: (param: any) => boolean): any;
+}
 declare module "auto-validate" {
     export * from "auto-validate/src/validators/index";
     export { validate, validateAsync } from "auto-validate/src/validate";
     export { display } from "auto-validate/src/display";
+    export { precondition } from 'auto-validate/src/precondition';
     export { ValidateResult } from "auto-validate/src/validateResult";
     export { IValidatorOptions } from "auto-validate/src/validatorOptions";
 }

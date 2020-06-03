@@ -13,4 +13,8 @@ export interface IValidateOptions {
      * @default error=>`${error.display}.${error.type}`;
      */
     selector?: (error) => string;
+    /**
+     * the param for precondition function
+     */
+    preconditionParam?: object;
 }

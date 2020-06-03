@@ -1,8 +1,25 @@
-import { REQUIRED_VALIDATE_PROPERYIES, VALIDATORS } from "./constants";
-import { ArrayHelper, pushByOrder, Reflect } from "./utils";
+import { VALIDATORS, PRECONDITION } from "./constants";
+import { Reflect } from "./utils";
 import { ValidateError } from "./validateError";
 import { IValidateOptions } from "./validateOptions";
 import { ValidateResult } from "./validateResult";
+import { IValidateInfo } from './validateInfo';
+
+function satisfied(target: any, instance: any, info: IValidateInfo, options: IValidateOptions) {
+    try {
+        if (info.options && typeof info.options.precondition === 'function') {
+            return info.options.precondition(options.preconditionParam, instance);
+        }
+        const precondition = Reflect.getMetadata(PRECONDITION, target, info.name);
+        if (typeof precondition === 'function') {
+            return precondition(options.preconditionParam, instance);
+        }
+    } catch (error) {
+        console.error(error);
+        return false;
+    }
+    return true;
+}
 
 /**
  * Validate objects and generate results with errors.
@@ -11,31 +28,19 @@ import { ValidateResult } from "./validateResult";
  */
 export function validate<T>(instance: T, options?: IValidateOptions): ValidateResult<T> {
     let target = instance;
+    options = Object.assign({}, options);
     if (options && options.type && typeof options.type === "function") {
         target = options.type.prototype;
     }
-    const properties: Set<string> = Reflect.getMetadata(REQUIRED_VALIDATE_PROPERYIES, target) || [];
-    const errors = ArrayHelper.from(properties)
-        .map((key) => Reflect.getMetadata(VALIDATORS, target, key) as Map<string, Function>)
-        .map((value) => value.values())
-        .flatten<Function>()
-        .reduce((result, validateFn) => {
-            const error = validateFn(instance, options) as ValidateError<T>;
-            if (error instanceof ValidateError) {
-                if (options && options.messages) {
-                    if (Object.prototype.toString.call(options.messages) !== "[object Object]") {
-                        throw new TypeError(`The parameter "templates" must be the object type.`);
-                    }
-                    error.setMessageFromObject(options.messages, options.selector);
-                }
-                if (!result.has(error.name)) {
-                    result.set(error.name, [error]);
-                } else {
-                    pushByOrder(result.get(error.name), error, "order");
-                }
-            }
-            return result;
-        }, new Map<any, ValidateError<T>[]>());
+    const errors = ((Reflect.getMetadata(VALIDATORS, target) || []) as IValidateInfo[])
+        .filter(validator => satisfied(target, instance, validator, options))
+        .filter(validator => !validator.predicate(instance[validator.name], instance))
+        .sort((x, y) => x.options.order - y.options.order)
+        .map((validator, index) => {
+            const error = new ValidateError<T>(instance, index, validator);
+            error.setMessageFromObject(options.messages, options.selector);
+            return error;
+        });
     return new ValidateResult(instance, errors);
 }
 

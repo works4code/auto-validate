@@ -13,8 +13,15 @@ export class ValidateResult<T> {
      * The first's error message
      */
     public message: string;
-    constructor(value: T, errors: Map<keyof T, ValidateError[]>) {
-        this.errors = errors;
+    constructor(value: T, errors: ValidateError[]) {
+        this.errors = errors.reduce((result, error) => {
+            if (!result.has(error.name)) {
+                result.set(error.name, [error]);
+            } else {
+                result.get(error.name).push(error);
+            };
+            return result;
+        }, new Map())
         this.value = value;
         if (this.hasError()) {
             this.message = this.toSingle().message;

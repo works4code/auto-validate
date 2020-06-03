@@ -81,7 +81,7 @@
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 10);
+/******/ 	return __webpack_require__(__webpack_require__.s = 9);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -91,9 +91,9 @@
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.validator = void 0;
 var constants_1 = __webpack_require__(3);
 var index_1 = __webpack_require__(1);
-var validateError_1 = __webpack_require__(6);
 /**
  * The default validator which can validate by pass a predicate function.
  * @param predicate The predicate function to validate current value.
@@ -101,22 +101,11 @@ var validateError_1 = __webpack_require__(6);
  */
 function validator(predicate, options) {
     return function (target, name) {
-        var validators = index_1.Reflect.getMetadata(constants_1.VALIDATORS, target, name) || new Map();
-        var properties = index_1.Reflect.getMetadata(constants_1.REQUIRED_VALIDATE_PROPERYIES, target) || new Set();
+        var validators = index_1.Reflect.getMetadata(constants_1.VALIDATORS, target) || [];
         var message = constants_1.DEFAULT_ERROR_MEESSAGES[options && options.type] || "Verification failed.";
-        options = Object.assign({ message: message, type: "default", order: validators.size }, options);
-        var fn = function (obj) {
-            var valid = predicate(obj[name], obj);
-            return valid ? undefined : new validateError_1.ValidateError(obj, name, options);
-        };
-        properties.add(name);
-        if (validators.has(options.type)) {
-            console.warn("Duplicate added " + options.type + " validator for " + name);
-            console.warn("Only one validator of the same type can exist on property, please set validator's type to use multiple custom validators.");
-        }
-        validators.set(options.type, fn);
-        index_1.Reflect.defineMetadata(constants_1.REQUIRED_VALIDATE_PROPERYIES, properties, target);
-        index_1.Reflect.defineMetadata(constants_1.VALIDATORS, validators, target, name);
+        options = Object.assign({ message: message, type: "default", order: Number.MAX_VALUE }, options);
+        validators.push({ predicate: predicate, options: options, name: name });
+        index_1.Reflect.defineMetadata(constants_1.VALIDATORS, validators, target);
     };
 }
 exports.validator = validator;
@@ -129,18 +118,15 @@ exports.validator = validator;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Reflect = void 0;
 var tslib_1 = __webpack_require__(2);
-var curry_1 = __webpack_require__(12);
-exports.curryRight = curry_1.curryRight;
-var isArrayLike_1 = __webpack_require__(13);
-exports.isArrayLike = isArrayLike_1.isArrayLike;
-var array_1 = __webpack_require__(14);
-exports.ArrayHelper = array_1.ArrayHelper;
-var isNil_1 = __webpack_require__(16);
-exports.isNil = isNil_1.isNil;
-var pushByOrder_1 = __webpack_require__(17);
-exports.pushByOrder = pushByOrder_1.pushByOrder;
-var reflect_1 = tslib_1.__importDefault(__webpack_require__(18));
+var curry_1 = __webpack_require__(11);
+Object.defineProperty(exports, "curryRight", { enumerable: true, get: function () { return curry_1.curryRight; } });
+var isArrayLike_1 = __webpack_require__(12);
+Object.defineProperty(exports, "isArrayLike", { enumerable: true, get: function () { return isArrayLike_1.isArrayLike; } });
+var isNil_1 = __webpack_require__(13);
+Object.defineProperty(exports, "isNil", { enumerable: true, get: function () { return isNil_1.isNil; } });
+var reflect_1 = tslib_1.__importDefault(__webpack_require__(14));
 exports.Reflect = reflect_1.default;
 
 
@@ -157,9 +143,10 @@ module.exports = require("tslib");
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.VALIDATORS = Symbol("Validators");
-exports.DISPLAY_NAME = Symbol("Display name symbol");
-exports.REQUIRED_VALIDATE_PROPERYIES = Symbol("All properties rquired to be validate");
+exports.DEFAULT_ERROR_MEESSAGES = exports.PRECONDITION = exports.DISPLAY_NAME = exports.VALIDATORS = void 0;
+exports.VALIDATORS = Symbol("Validators symbol key");
+exports.DISPLAY_NAME = Symbol("Display name symbol key");
+exports.PRECONDITION = Symbol('Precondition symbol key');
 exports.DEFAULT_ERROR_MEESSAGES = {
     contains: "The {display} is not contains {$0}.",
     email: "The {display} is not the correct email address format.",
@@ -186,6 +173,7 @@ exports.DEFAULT_ERROR_MEESSAGES = {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.equals = exports.isEqual = void 0;
 var validator_1 = __webpack_require__(0);
 /**
  * Compare between two values to determine if they are equivalent.
@@ -228,6 +216,7 @@ exports.equals = equals;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.gt = exports.isGreaterThan = void 0;
 var index_1 = __webpack_require__(1);
 var validator_1 = __webpack_require__(0);
 /**
@@ -259,60 +248,7 @@ exports.gt = gt;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var secure_template_1 = __webpack_require__(21);
-var constants_1 = __webpack_require__(3);
-var utils_1 = __webpack_require__(1);
-var ValidateError = /** @class */ (function () {
-    function ValidateError(target, name, options) {
-        var _this = this;
-        /**
-         * The error sequence number. the default is the order in which the decorators are added.
-         */
-        this.order = 0;
-        this.type = options.type;
-        this.name = name;
-        this.value = target[name];
-        this.order = options.order;
-        this.display = utils_1.Reflect.getMetadata(constants_1.DISPLAY_NAME, target, name) || name;
-        if (utils_1.isArrayLike(options.arguments)) {
-            utils_1.ArrayHelper.from(options.arguments).forEach(function (val, idx) { return _this["$" + idx] = val; });
-        }
-        this.setMessage(options.message);
-    }
-    /**
-     * Set the error message
-     * @param template The template of error message
-     */
-    ValidateError.prototype.setMessage = function (template) {
-        if (typeof template !== 'string')
-            return;
-        this.message = secure_template_1.format(template, this);
-    };
-    /**
-     * Set the error message from template object.
-     * @param templates The template object.
-     * @param selector The key selector
-     */
-    ValidateError.prototype.setMessageFromObject = function (templates, selector) {
-        selector = typeof selector === 'function' ? selector : function (err) { return err.display + "." + err.type; };
-        var key = selector(this);
-        this.setMessage(templates[key]);
-    };
-    ValidateError.prototype.toString = function () {
-        return this.message;
-    };
-    return ValidateError;
-}());
-exports.ValidateError = ValidateError;
-
-
-/***/ }),
-/* 7 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
+exports.range = exports.isInRange = void 0;
 var index_1 = __webpack_require__(1);
 var validator_1 = __webpack_require__(0);
 /**
@@ -340,12 +276,13 @@ exports.range = range;
 
 
 /***/ }),
-/* 8 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.matches = exports.isMatch = void 0;
 var index_1 = __webpack_require__(1);
 var validator_1 = __webpack_require__(0);
 /**
@@ -380,16 +317,26 @@ exports.matches = matches;
 
 
 /***/ }),
-/* 9 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ValidateResult = void 0;
 var tslib_1 = __webpack_require__(2);
 var ValidateResult = /** @class */ (function () {
     function ValidateResult(value, errors) {
-        this.errors = errors;
+        this.errors = errors.reduce(function (result, error) {
+            if (!result.has(error.name)) {
+                result.set(error.name, [error]);
+            }
+            else {
+                result.get(error.name).push(error);
+            }
+            ;
+            return result;
+        }, new Map());
         this.value = value;
         if (this.hasError()) {
             this.message = this.toSingle().message;
@@ -494,6 +441,26 @@ exports.ValidateResult = ValidateResult;
 
 
 /***/ }),
+/* 9 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var tslib_1 = __webpack_require__(2);
+tslib_1.__exportStar(__webpack_require__(10), exports);
+var validate_1 = __webpack_require__(29);
+Object.defineProperty(exports, "validate", { enumerable: true, get: function () { return validate_1.validate; } });
+Object.defineProperty(exports, "validateAsync", { enumerable: true, get: function () { return validate_1.validateAsync; } });
+var display_1 = __webpack_require__(32);
+Object.defineProperty(exports, "display", { enumerable: true, get: function () { return display_1.display; } });
+var precondition_1 = __webpack_require__(33);
+Object.defineProperty(exports, "precondition", { enumerable: true, get: function () { return precondition_1.precondition; } });
+var validateResult_1 = __webpack_require__(8);
+Object.defineProperty(exports, "ValidateResult", { enumerable: true, get: function () { return validateResult_1.ValidateResult; } });
+
+
+/***/ }),
 /* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -501,14 +468,24 @@ exports.ValidateResult = ValidateResult;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(2);
-tslib_1.__exportStar(__webpack_require__(11), exports);
-var validate_1 = __webpack_require__(34);
-exports.validate = validate_1.validate;
-exports.validateAsync = validate_1.validateAsync;
-var display_1 = __webpack_require__(35);
-exports.display = display_1.display;
-var validateResult_1 = __webpack_require__(9);
-exports.ValidateResult = validateResult_1.ValidateResult;
+tslib_1.__exportStar(__webpack_require__(5), exports);
+tslib_1.__exportStar(__webpack_require__(17), exports);
+tslib_1.__exportStar(__webpack_require__(18), exports);
+tslib_1.__exportStar(__webpack_require__(19), exports);
+tslib_1.__exportStar(__webpack_require__(4), exports);
+tslib_1.__exportStar(__webpack_require__(20), exports);
+tslib_1.__exportStar(__webpack_require__(21), exports);
+tslib_1.__exportStar(__webpack_require__(7), exports);
+tslib_1.__exportStar(__webpack_require__(22), exports);
+tslib_1.__exportStar(__webpack_require__(23), exports);
+tslib_1.__exportStar(__webpack_require__(7), exports);
+tslib_1.__exportStar(__webpack_require__(24), exports);
+tslib_1.__exportStar(__webpack_require__(6), exports);
+tslib_1.__exportStar(__webpack_require__(25), exports);
+tslib_1.__exportStar(__webpack_require__(26), exports);
+tslib_1.__exportStar(__webpack_require__(0), exports);
+tslib_1.__exportStar(__webpack_require__(27), exports);
+tslib_1.__exportStar(__webpack_require__(28), exports);
 
 
 /***/ }),
@@ -518,34 +495,7 @@ exports.ValidateResult = validateResult_1.ValidateResult;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var tslib_1 = __webpack_require__(2);
-tslib_1.__exportStar(__webpack_require__(5), exports);
-tslib_1.__exportStar(__webpack_require__(22), exports);
-tslib_1.__exportStar(__webpack_require__(23), exports);
-tslib_1.__exportStar(__webpack_require__(24), exports);
-tslib_1.__exportStar(__webpack_require__(4), exports);
-tslib_1.__exportStar(__webpack_require__(25), exports);
-tslib_1.__exportStar(__webpack_require__(26), exports);
-tslib_1.__exportStar(__webpack_require__(8), exports);
-tslib_1.__exportStar(__webpack_require__(27), exports);
-tslib_1.__exportStar(__webpack_require__(28), exports);
-tslib_1.__exportStar(__webpack_require__(8), exports);
-tslib_1.__exportStar(__webpack_require__(29), exports);
-tslib_1.__exportStar(__webpack_require__(7), exports);
-tslib_1.__exportStar(__webpack_require__(30), exports);
-tslib_1.__exportStar(__webpack_require__(31), exports);
-tslib_1.__exportStar(__webpack_require__(0), exports);
-tslib_1.__exportStar(__webpack_require__(32), exports);
-tslib_1.__exportStar(__webpack_require__(33), exports);
-
-
-/***/ }),
-/* 12 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
+exports.curryRight = void 0;
 var tslib_1 = __webpack_require__(2);
 function curryRight(fn) {
     var args = [];
@@ -574,12 +524,13 @@ exports.curryRight = curryRight;
 
 
 /***/ }),
-/* 13 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.isArrayLike = void 0;
 function isArrayLike(value) {
     if (Array.isArray(value) || typeof value === "string") {
         return true;
@@ -605,241 +556,13 @@ exports.isArrayLike = isArrayLike;
 
 
 /***/ }),
-/* 14 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var tslib_1 = __webpack_require__(2);
-var isIterator_1 = __webpack_require__(15);
-var ArrayHelper = /** @class */ (function () {
-    function ArrayHelper(iterable) {
-        this.values = iterable;
-    }
-    ArrayHelper.from = function (iterable) {
-        return new ArrayHelper(iterable);
-    };
-    ArrayHelper.prototype.flatten = function () {
-        var values = this.values;
-        function createIterator() {
-            var values_1, values_1_1, value, _a, _b, iterator, e_1_1, e_2_1;
-            var e_2, _c, e_1, _d;
-            return tslib_1.__generator(this, function (_e) {
-                switch (_e.label) {
-                    case 0:
-                        _e.trys.push([0, 14, 15, 16]);
-                        values_1 = tslib_1.__values(values), values_1_1 = values_1.next();
-                        _e.label = 1;
-                    case 1:
-                        if (!!values_1_1.done) return [3 /*break*/, 13];
-                        value = values_1_1.value;
-                        if (!(Array.isArray(value) || isIterator_1.isIterable(value))) return [3 /*break*/, 10];
-                        _e.label = 2;
-                    case 2:
-                        _e.trys.push([2, 7, 8, 9]);
-                        _a = (e_1 = void 0, tslib_1.__values(value)), _b = _a.next();
-                        _e.label = 3;
-                    case 3:
-                        if (!!_b.done) return [3 /*break*/, 6];
-                        iterator = _b.value;
-                        return [4 /*yield*/, iterator];
-                    case 4:
-                        _e.sent();
-                        _e.label = 5;
-                    case 5:
-                        _b = _a.next();
-                        return [3 /*break*/, 3];
-                    case 6: return [3 /*break*/, 9];
-                    case 7:
-                        e_1_1 = _e.sent();
-                        e_1 = { error: e_1_1 };
-                        return [3 /*break*/, 9];
-                    case 8:
-                        try {
-                            if (_b && !_b.done && (_d = _a.return)) _d.call(_a);
-                        }
-                        finally { if (e_1) throw e_1.error; }
-                        return [7 /*endfinally*/];
-                    case 9: return [3 /*break*/, 12];
-                    case 10: return [4 /*yield*/, value];
-                    case 11:
-                        _e.sent();
-                        _e.label = 12;
-                    case 12:
-                        values_1_1 = values_1.next();
-                        return [3 /*break*/, 1];
-                    case 13: return [3 /*break*/, 16];
-                    case 14:
-                        e_2_1 = _e.sent();
-                        e_2 = { error: e_2_1 };
-                        return [3 /*break*/, 16];
-                    case 15:
-                        try {
-                            if (values_1_1 && !values_1_1.done && (_c = values_1.return)) _c.call(values_1);
-                        }
-                        finally { if (e_2) throw e_2.error; }
-                        return [7 /*endfinally*/];
-                    case 16: return [2 /*return*/];
-                }
-            });
-        }
-        return ArrayHelper.from(createIterator());
-    };
-    ArrayHelper.prototype.filter = function (predicate) {
-        var values = this.values;
-        function createIterator() {
-            var index, values_2, values_2_1, value, e_3_1;
-            var e_3, _a;
-            return tslib_1.__generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0:
-                        index = 0;
-                        _b.label = 1;
-                    case 1:
-                        _b.trys.push([1, 6, 7, 8]);
-                        values_2 = tslib_1.__values(values), values_2_1 = values_2.next();
-                        _b.label = 2;
-                    case 2:
-                        if (!!values_2_1.done) return [3 /*break*/, 5];
-                        value = values_2_1.value;
-                        if (!predicate(value, index++)) return [3 /*break*/, 4];
-                        return [4 /*yield*/, value];
-                    case 3:
-                        _b.sent();
-                        _b.label = 4;
-                    case 4:
-                        values_2_1 = values_2.next();
-                        return [3 /*break*/, 2];
-                    case 5: return [3 /*break*/, 8];
-                    case 6:
-                        e_3_1 = _b.sent();
-                        e_3 = { error: e_3_1 };
-                        return [3 /*break*/, 8];
-                    case 7:
-                        try {
-                            if (values_2_1 && !values_2_1.done && (_a = values_2.return)) _a.call(values_2);
-                        }
-                        finally { if (e_3) throw e_3.error; }
-                        return [7 /*endfinally*/];
-                    case 8: return [2 /*return*/];
-                }
-            });
-        }
-        return ArrayHelper.from(createIterator());
-    };
-    ArrayHelper.prototype.forEach = function (func) {
-        var e_4, _a;
-        if (typeof func !== "function") {
-            return;
-        }
-        var index = 0;
-        var values = this.values;
-        try {
-            for (var values_3 = tslib_1.__values(values), values_3_1 = values_3.next(); !values_3_1.done; values_3_1 = values_3.next()) {
-                var value = values_3_1.value;
-                func(value, index++);
-            }
-        }
-        catch (e_4_1) { e_4 = { error: e_4_1 }; }
-        finally {
-            try {
-                if (values_3_1 && !values_3_1.done && (_a = values_3.return)) _a.call(values_3);
-            }
-            finally { if (e_4) throw e_4.error; }
-        }
-    };
-    ArrayHelper.prototype.map = function (func) {
-        var values = this.values;
-        function createIterator() {
-            var index, values_4, values_4_1, value, e_5_1;
-            var e_5, _a;
-            return tslib_1.__generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0:
-                        index = 0;
-                        _b.label = 1;
-                    case 1:
-                        _b.trys.push([1, 6, 7, 8]);
-                        values_4 = tslib_1.__values(values), values_4_1 = values_4.next();
-                        _b.label = 2;
-                    case 2:
-                        if (!!values_4_1.done) return [3 /*break*/, 5];
-                        value = values_4_1.value;
-                        return [4 /*yield*/, func(value, index++)];
-                    case 3:
-                        _b.sent();
-                        _b.label = 4;
-                    case 4:
-                        values_4_1 = values_4.next();
-                        return [3 /*break*/, 2];
-                    case 5: return [3 /*break*/, 8];
-                    case 6:
-                        e_5_1 = _b.sent();
-                        e_5 = { error: e_5_1 };
-                        return [3 /*break*/, 8];
-                    case 7:
-                        try {
-                            if (values_4_1 && !values_4_1.done && (_a = values_4.return)) _a.call(values_4);
-                        }
-                        finally { if (e_5) throw e_5.error; }
-                        return [7 /*endfinally*/];
-                    case 8: return [2 /*return*/];
-                }
-            });
-        }
-        return ArrayHelper.from(createIterator());
-    };
-    ArrayHelper.prototype.reduce = function (func, seed) {
-        var e_6, _a;
-        var index = 0;
-        var values = this.values;
-        try {
-            for (var values_5 = tslib_1.__values(values), values_5_1 = values_5.next(); !values_5_1.done; values_5_1 = values_5.next()) {
-                var value = values_5_1.value;
-                seed = func(seed, value, index++);
-            }
-        }
-        catch (e_6_1) { e_6 = { error: e_6_1 }; }
-        finally {
-            try {
-                if (values_5_1 && !values_5_1.done && (_a = values_5.return)) _a.call(values_5);
-            }
-            finally { if (e_6) throw e_6.error; }
-        }
-        return seed;
-    };
-    ArrayHelper.prototype.valueOf = function () {
-        return Array.from(this.values);
-    };
-    return ArrayHelper;
-}());
-exports.ArrayHelper = ArrayHelper;
-
-
-/***/ }),
-/* 15 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-function isIterable(obj) {
-    if (obj == null) {
-        return false;
-    }
-    return typeof obj[Symbol.iterator] === "function";
-}
-exports.isIterable = isIterable;
-
-
-/***/ }),
-/* 16 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
+exports.isNil = void 0;
 function isNil(value) {
     return value === undefined || value === null;
 }
@@ -847,33 +570,13 @@ exports.isNil = isNil;
 
 
 /***/ }),
-/* 17 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-function pushByOrder(collection, value, orderBy) {
-    for (var index = 0, length_1 = collection.length; index < length_1; index++) {
-        if (value[orderBy] <= collection[index][orderBy]) {
-            collection.splice(index, 0, value);
-            return collection;
-        }
-    }
-    collection.push(value);
-    return collection;
-}
-exports.pushByOrder = pushByOrder;
-
-
-/***/ }),
-/* 18 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(global) {
 Object.defineProperty(exports, "__esModule", { value: true });
-__webpack_require__(20);
+__webpack_require__(16);
 function isValid(obj) {
     return typeof obj === "object" && typeof obj.getMetadata === "function";
 }
@@ -891,10 +594,10 @@ var reflect = (function () {
 }());
 exports.default = reflect;
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(19)))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(15)))
 
 /***/ }),
-/* 19 */
+/* 15 */
 /***/ (function(module, exports) {
 
 var g;
@@ -920,24 +623,19 @@ module.exports = g;
 
 
 /***/ }),
-/* 20 */
+/* 16 */
 /***/ (function(module, exports) {
 
 module.exports = require("reflect-metadata");
 
 /***/ }),
-/* 21 */
-/***/ (function(module, exports) {
-
-module.exports = require("secure-template");
-
-/***/ }),
-/* 22 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.gte = exports.isGreaterThanOrEqualTo = void 0;
 var index_1 = __webpack_require__(1);
 var equals_1 = __webpack_require__(4);
 var gt_1 = __webpack_require__(5);
@@ -965,12 +663,13 @@ exports.gte = gte;
 
 
 /***/ }),
-/* 23 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.contains = exports.isContain = void 0;
 var index_1 = __webpack_require__(1);
 var equals_1 = __webpack_require__(4);
 var validator_1 = __webpack_require__(0);
@@ -1017,12 +716,13 @@ exports.contains = contains;
 
 
 /***/ }),
-/* 24 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.email = exports.isEmail = void 0;
 var validator_1 = __webpack_require__(0);
 /**
  * Indicates whether or not the value is a is a valid email address.
@@ -1044,12 +744,13 @@ exports.email = email;
 
 
 /***/ }),
-/* 25 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ip = exports.isIP = void 0;
 var index_1 = __webpack_require__(1);
 var validator_1 = __webpack_require__(0);
 var rules = {
@@ -1084,14 +785,15 @@ exports.ip = ip;
 
 
 /***/ }),
-/* 26 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.length = exports.isLengthSatisfied = void 0;
 var index_1 = __webpack_require__(1);
-var range_1 = __webpack_require__(7);
+var range_1 = __webpack_require__(6);
 var validator_1 = __webpack_require__(0);
 /**
  * Returns a Boolean value that indicates whether or not the value's length is satisfied the special demand.
@@ -1136,12 +838,13 @@ exports.length = length;
 
 
 /***/ }),
-/* 27 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.lt = exports.isLessThan = void 0;
 var index_1 = __webpack_require__(1);
 var validator_1 = __webpack_require__(0);
 /**
@@ -1167,12 +870,13 @@ exports.lt = lt;
 
 
 /***/ }),
-/* 28 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.lte = exports.isLessThanOrEqualTo = void 0;
 var index_1 = __webpack_require__(1);
 var validator_1 = __webpack_require__(0);
 /**
@@ -1198,12 +902,13 @@ exports.lte = lte;
 
 
 /***/ }),
-/* 29 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.negate = void 0;
 var validator_1 = __webpack_require__(0);
 /**
  * Reverse the validator and take the opposite result.
@@ -1217,12 +922,13 @@ exports.negate = negate;
 
 
 /***/ }),
-/* 30 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.required = exports.isRequired = void 0;
 var utils_1 = __webpack_require__(1);
 var validator_1 = __webpack_require__(0);
 /**
@@ -1268,12 +974,13 @@ exports.required = required;
 
 
 /***/ }),
-/* 31 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.url = exports.isURL = void 0;
 var validator_1 = __webpack_require__(0);
 /**
  * Return a boolean value to indicates whether or not the string is an URL.
@@ -1295,12 +1002,13 @@ exports.url = url;
 
 
 /***/ }),
-/* 32 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.numeric = exports.isNumeric = void 0;
 var validator_1 = __webpack_require__(0);
 /**
  * Indicates whether or not value is valid number or string contains only numbers.
@@ -1336,12 +1044,13 @@ exports.numeric = numeric;
 
 
 /***/ }),
-/* 33 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.type = exports.isType = void 0;
 var utils_1 = __webpack_require__(1);
 var validator_1 = __webpack_require__(0);
 /**
@@ -1366,16 +1075,33 @@ exports.type = type;
 
 
 /***/ }),
-/* 34 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.validateAsync = exports.validate = void 0;
 var constants_1 = __webpack_require__(3);
 var utils_1 = __webpack_require__(1);
-var validateError_1 = __webpack_require__(6);
-var validateResult_1 = __webpack_require__(9);
+var validateError_1 = __webpack_require__(30);
+var validateResult_1 = __webpack_require__(8);
+function satisfied(target, instance, info, options) {
+    try {
+        if (info.options && typeof info.options.precondition === 'function') {
+            return info.options.precondition(options.preconditionParam, instance);
+        }
+        var precondition = utils_1.Reflect.getMetadata(constants_1.PRECONDITION, target, info.name);
+        if (typeof precondition === 'function') {
+            return precondition(options.preconditionParam, instance);
+        }
+    }
+    catch (error) {
+        console.error(error);
+        return false;
+    }
+    return true;
+}
 /**
  * Validate objects and generate results with errors.
  * @param instance validated object.
@@ -1383,32 +1109,19 @@ var validateResult_1 = __webpack_require__(9);
  */
 function validate(instance, options) {
     var target = instance;
+    options = Object.assign({}, options);
     if (options && options.type && typeof options.type === "function") {
         target = options.type.prototype;
     }
-    var properties = utils_1.Reflect.getMetadata(constants_1.REQUIRED_VALIDATE_PROPERYIES, target) || [];
-    var errors = utils_1.ArrayHelper.from(properties)
-        .map(function (key) { return utils_1.Reflect.getMetadata(constants_1.VALIDATORS, target, key); })
-        .map(function (value) { return value.values(); })
-        .flatten()
-        .reduce(function (result, validateFn) {
-        var error = validateFn(instance, options);
-        if (error instanceof validateError_1.ValidateError) {
-            if (options && options.messages) {
-                if (Object.prototype.toString.call(options.messages) !== "[object Object]") {
-                    throw new TypeError("The parameter \"templates\" must be the object type.");
-                }
-                error.setMessageFromObject(options.messages, options.selector);
-            }
-            if (!result.has(error.name)) {
-                result.set(error.name, [error]);
-            }
-            else {
-                utils_1.pushByOrder(result.get(error.name), error, "order");
-            }
-        }
-        return result;
-    }, new Map());
+    var errors = (utils_1.Reflect.getMetadata(constants_1.VALIDATORS, target) || [])
+        .filter(function (validator) { return satisfied(target, instance, validator, options); })
+        .filter(function (validator) { return !validator.predicate(instance[validator.name], instance); })
+        .sort(function (x, y) { return x.options.order - y.options.order; })
+        .map(function (validator, index) {
+        var error = new validateError_1.ValidateError(instance, index, validator);
+        error.setMessageFromObject(options.messages, options.selector);
+        return error;
+    });
     return new validateResult_1.ValidateResult(instance, errors);
 }
 exports.validate = validate;
@@ -1433,12 +1146,77 @@ exports.validateAsync = validateAsync;
 
 
 /***/ }),
-/* 35 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ValidateError = void 0;
+var secure_template_1 = __webpack_require__(31);
+var constants_1 = __webpack_require__(3);
+var utils_1 = __webpack_require__(1);
+var ValidateError = /** @class */ (function () {
+    function ValidateError(target, order, validator) {
+        var _this = this;
+        /**
+         * The error sequence number.
+         */
+        this.order = 0;
+        this.type = validator.options.type;
+        this.name = validator.name;
+        this.value = target[validator.name];
+        this.order = order;
+        this.display = utils_1.Reflect.getMetadata(constants_1.DISPLAY_NAME, target, validator.name) || validator.name;
+        if (utils_1.isArrayLike(validator.options.arguments)) {
+            Array.from(validator.options.arguments).forEach(function (val, idx) { return _this["$" + idx] = val; });
+        }
+        this.setMessage(validator.options.message);
+    }
+    /**
+     * Set the error message
+     * @param template The template of error message
+     */
+    ValidateError.prototype.setMessage = function (template) {
+        if (typeof template !== 'string')
+            return;
+        this.message = secure_template_1.format(template, this);
+    };
+    /**
+     * Set the error message from template object.
+     * @param templates The template object.
+     * @param selector The key selector
+     */
+    ValidateError.prototype.setMessageFromObject = function (templates, selector) {
+        if (Object.prototype.toString.call(templates) !== "[object Object]")
+            return this;
+        selector = typeof selector === 'function' ? selector : function (err) { return err.display + "." + err.type; };
+        var key = selector(this);
+        this.setMessage(templates[key]);
+        return this;
+    };
+    ValidateError.prototype.toString = function () {
+        return this.message;
+    };
+    return ValidateError;
+}());
+exports.ValidateError = ValidateError;
+
+
+/***/ }),
+/* 31 */
+/***/ (function(module, exports) {
+
+module.exports = require("secure-template");
+
+/***/ }),
+/* 32 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.display = void 0;
 var constants_1 = __webpack_require__(3);
 var index_1 = __webpack_require__(1);
 /**
@@ -1451,6 +1229,21 @@ function display(name) {
     };
 }
 exports.display = display;
+
+
+/***/ }),
+/* 33 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.precondition = void 0;
+var constants_1 = __webpack_require__(3);
+function precondition(predicate) {
+    return Reflect.metadata(constants_1.PRECONDITION, predicate);
+}
+exports.precondition = precondition;
 
 
 /***/ })

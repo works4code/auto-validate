@@ -1,7 +1,8 @@
 import { format } from "secure-template";
 import { DISPLAY_NAME } from "./constants";
-import { ArrayHelper, isArrayLike, Reflect } from "./utils";
+import { isArrayLike, Reflect } from "./utils";
 import { IValidatorOptions } from "./validatorOptions";
+import { IValidateInfo } from './validateInfo';
 
 export class ValidateError<T = any> implements IValidatorOptions {
     [x: string]: any;
@@ -26,20 +27,20 @@ export class ValidateError<T = any> implements IValidatorOptions {
      */
     public value: any;
     /**
-     * The error sequence number. the default is the order in which the decorators are added.
+     * The error sequence number.
      */
     public order: number = 0;
 
-    constructor(target: any, name: keyof T, options: IValidatorOptions) {
-        this.type = options.type;
-        this.name = name;
-        this.value = target[name];
-        this.order = options.order;
-        this.display = Reflect.getMetadata(DISPLAY_NAME, target, name as any) || name;
-        if (isArrayLike(options.arguments)) {
-            ArrayHelper.from(options.arguments).forEach((val, idx) => this[`$${idx}`] = val);
+    constructor(target: any, order: number, validator: IValidateInfo) {
+        this.type = validator.options.type;
+        this.name = validator.name as any;
+        this.value = target[validator.name];
+        this.order = order;
+        this.display = Reflect.getMetadata(DISPLAY_NAME, target, validator.name) || validator.name;
+        if (isArrayLike(validator.options.arguments)) {
+            Array.from(validator.options.arguments).forEach((val, idx) => this[`$${idx}`] = val);
         }
-        this.setMessage(options.message);
+        this.setMessage(validator.options.message);
     }
 
     /**
@@ -57,9 +58,11 @@ export class ValidateError<T = any> implements IValidatorOptions {
      * @param selector The key selector
      */
     public setMessageFromObject(templates: Record<string, string>, selector?: (error: ValidateError) => string) {
+        if (Object.prototype.toString.call(templates) !== "[object Object]") return this;
         selector = typeof selector === 'function' ? selector : err => `${err.display}.${err.type}`;
         const key = selector(this);
         this.setMessage(templates[key]);
+        return this;
     }
 
     public toString() {

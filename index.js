@@ -1089,11 +1089,11 @@ var validateResult_1 = __webpack_require__(8);
 function satisfied(target, instance, info, options) {
     try {
         if (info.options && typeof info.options.precondition === 'function') {
-            return info.options.precondition(options.preconditionParam, instance);
+            return info.options.precondition.call(instance, options.preconditionParam, instance);
         }
         var precondition = utils_1.Reflect.getMetadata(constants_1.PRECONDITION, target, info.name);
         if (typeof precondition === 'function') {
-            return precondition(options.preconditionParam, instance);
+            return precondition.call(instance, options.preconditionParam, instance);
         }
     }
     catch (error) {

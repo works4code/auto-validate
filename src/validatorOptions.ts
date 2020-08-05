@@ -12,7 +12,7 @@ export interface IValidatorOptions extends Record<string, any> {
     /**
      * The precondition to validate.
      */
-    precondition?: (param?, instance?) => boolean;
+    precondition?: <T = any>(this: T, param?, instance?: T) => boolean;
     /**
      * The order to validate.
      */

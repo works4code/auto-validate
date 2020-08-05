@@ -34,7 +34,7 @@ declare module "auto-validate/src/validatorOptions" {
         /**
          * The precondition to validate.
          */
-        precondition?: (param?: any, instance?: any) => boolean;
+        precondition?: <T = any>(this: T, param?: any, instance?: T) => boolean;
         /**
          * The order to validate.
          */
@@ -527,7 +527,7 @@ declare module "auto-validate/src/display" {
     export function display(name: string): (target: any, originName: string) => void;
 }
 declare module "auto-validate/src/precondition" {
-    export function precondition(predicate: (param: any) => boolean): any;
+    export function precondition<T = any>(predicate: (this: T, param: any, instance?: T) => boolean): any;
 }
 declare module "auto-validate" {
     export * from "auto-validate/src/validators/index";

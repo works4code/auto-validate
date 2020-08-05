@@ -116,6 +116,10 @@ export class User {
     // always excute required validation.
     @required({ precondition:()=>true })
     email: string;
+    // excute validattion if this.email is absent.
+    @required({ precondition:(_, instance)=> !instance.email })
+    // or @required({ precondition: function(){ return !this.email }})
+    phone: string;
 }
 
 // validate with predictionParam

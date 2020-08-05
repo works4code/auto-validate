@@ -8,11 +8,11 @@ import { IValidateInfo } from './validateInfo';
 function satisfied(target: any, instance: any, info: IValidateInfo, options: IValidateOptions) {
     try {
         if (info.options && typeof info.options.precondition === 'function') {
-            return info.options.precondition(options.preconditionParam, instance);
+            return info.options.precondition.call(instance, options.preconditionParam, instance);
         }
         const precondition = Reflect.getMetadata(PRECONDITION, target, info.name);
         if (typeof precondition === 'function') {
-            return precondition(options.preconditionParam, instance);
+            return precondition.call(instance, options.preconditionParam, instance);
         }
     } catch (error) {
         console.error(error);

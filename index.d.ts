@@ -375,7 +375,6 @@ declare module "auto-validate/src/validators/index" {
     export * from "auto-validate/src/validators/equals";
     export * from "auto-validate/src/validators/ip";
     export * from "auto-validate/src/validators/length";
-    export * from "auto-validate/src/validators/matches";
     export * from "auto-validate/src/validators/lt";
     export * from "auto-validate/src/validators/lte";
     export * from "auto-validate/src/validators/matches";
